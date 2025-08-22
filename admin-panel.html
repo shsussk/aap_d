@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control - Ecosistema de Innovación Regenerativa</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-panel {
+            background: linear-gradient(135deg, #2d5a87 0%, #1e3a5f 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .admin-header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .admin-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .admin-tab {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .admin-tab.active {
+            background: var(--color-teal-600);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(33, 128, 141, 0.3);
+        }
+        
+        .admin-content {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            color: var(--color-charcoal-700);
+            font-size: 0.9rem;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--color-teal-600);
+            box-shadow: 0 0 0 3px rgba(33, 128, 141, 0.1);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .btn-admin {
+            background: var(--color-teal-600);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 1rem;
+        }
+        
+        .btn-admin:hover {
+            background: var(--color-teal-700);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(33, 128, 141, 0.3);
+        }
+        
+        .btn-admin.danger {
+            background: var(--color-red-500);
+        }
+        
+        .btn-admin.danger:hover {
+            background: #dc2626;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2rem;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .data-table th {
+            background: var(--color-teal-50);
+            font-weight: 600;
+            color: var(--color-charcoal-700);
+        }
+        
+        .data-table tr:hover {
+            background: #f9fafb;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-active { background: #dcfce7; color: #16a34a; }
+        .status-pending { background: #fef3c7; color: #d97706; }
+        .status-completed { background: #dbeafe; color: #2563eb; }
+        
+        .file-upload {
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            transition: border-color 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .file-upload:hover,
+        .file-upload.dragover {
+            border-color: var(--color-teal-600);
+            background: rgba(33, 128, 141, 0.05);
+        }
+        
+        .hidden { display: none; }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .analytics-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .analytics-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .analytics-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-panel">
+        <!-- Header del Panel Administrativo -->
+        <div class="admin-header">
+            <h1>🔧 Panel de Control - Ecosistema de Innovación Regenerativa</h1>
+            <p>Administra y actualiza toda la plataforma desde aquí</p>
+            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                <button class="btn-admin" onclick="backupData()">📥 Respaldar Datos</button>
+                <button class="btn-admin" onclick="importData()">📤 Importar Datos</button>
+                <button class="btn-admin" onclick="window.open('index.html', '_blank')">👁️ Ver Plataforma</button>
+            </div>
+        </div>
+        
+        <!-- Analytics Dashboard -->
+        <div class="admin-content">
+            <h2>📊 Métricas en Tiempo Real</h2>
+            <div class="analytics-grid">
+                <div class="analytics-card">
+                    <div class="analytics-number" id="total-problemas">0</div>
+                    <div class="analytics-label">Problemas Registrados</div>
+                </div>
+                <div class="analytics-card">
+                    <div class="analytics-number" id="ensayos-activos">0</div>
+                    <div class="analytics-label">Ensayos Activos</div>
+                </div>
+                <div class="analytics-card">
+                    <div class="analytics-number" id="historias-exito">0</div>
+                    <div class="analytics-label">Casos de Éxito</div>
+                </div>
+                <div class="analytics-card">
+                    <div class="analytics-number" id="usuarios-activos">0</div>
+                    <div class="analytics-label">Red Humana</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pestañas de Administración -->
+        <div class="admin-tabs">
+            <button class="admin-tab active" onclick="showTab('problemas')">🚨 Problemas</button>
+            <button class="admin-tab" onclick="showTab('ensayos')">🧪 Ensayos</button>
+            <button class="admin-tab" onclick="showTab('historias')">🏆 Historias</button>
+            <button class="admin-tab" onclick="showTab('usuarios')">👥 Red Humana</button>
+            <button class="admin-tab" onclick="showTab('configuracion')">⚙️ Configuración</button>
+        </div>
+        
+        <!-- Contenido de las Pestañas -->
+        <div class="admin-content">
+            <!-- Tab: Problemas -->
+            <div id="tab-problemas" class="tab-content">
+                <h2>🚨 Gestión de Problemas</h2>
+                
+                <form id="form-problema" class="form-grid">
+                    <div class="form-group">
+                        <label>Título del Problema *</label>
+                        <input type="text" id="problema-titulo" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Área *</label>
+                        <select id="problema-area" required>
+                            <option value="">Seleccionar área...</option>
+                            <option value="Producción">Producción</option>
+                            <option value="Calidad">Calidad</option>
+                            <option value="Postcosecha">Postcosecha</option>
+                            <option value="Riego">Riego</option>
+                            <option value="Nutrición">Nutrición</option>
+                            <option value="Maquinaria">Maquinaria</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Reportero</label>
+                        <input type="text" id="problema-reportero">
+                    </div>
+                    <div class="form-group">
+                        <label>Urgencia (1-5) *</label>
+                        <input type="number" id="problema-urgencia" min="1" max="5" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <select id="problema-estado">
+                            <option value="Reportado">Reportado</option>
+                            <option value="En revisión">En revisión</option>
+                            <option value="Priorizado">Priorizado</option>
+                            <option value="En ensayo">En ensayo</option>
+                            <option value="Resuelto">Resuelto</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha</label>
+                        <input type="date" id="problema-fecha">
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Descripción *</label>
+                        <textarea id="problema-descripcion" required></textarea>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Subir Imagen</label>
+                        <div class="file-upload" onclick="document.getElementById('problema-imagen').click()">
+                            <p>📷 Click para subir imagen del problema</p>
+                            <input type="file" id="problema-imagen" style="display: none;" accept="image/*">
+                        </div>
+                    </div>
+                </form>
+                
+                <div style="margin-top: 2rem;">
+                    <button class="btn-admin" onclick="guardarProblema()">💾 Guardar Problema</button>
+                    <button class="btn-admin" onclick="limpiarFormularioProblema()">🗑️ Limpiar</button>
+                </div>
+                
+                <table class="data-table" id="tabla-problemas">
+                    <thead>
+                        <tr>
+                            <th>Título</th>
+                            <th>Área</th>
+                            <th>Reportero</th>
+                            <th>Urgencia</th>
+                            <th>Estado</th>
+                            <th>Fecha</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            
+            <!-- Tab: Ensayos -->
+            <div id="tab-ensayos" class="tab-content hidden">
+                <h2>🧪 Gestión de Ensayos</h2>
+                
+                <form id="form-ensayo" class="form-grid">
+                    <div class="form-group">
+                        <label>Título del Ensayo *</label>
+                        <input type="text" id="ensayo-titulo" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Problema de Origen</label>
+                        <select id="ensayo-problema-origen">
+                            <option value="">Seleccionar problema...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Responsable I+D *</label>
+                        <input type="text" id="ensayo-responsable" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Validador de Campo</label>
+                        <input type="text" id="ensayo-validador">
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha de Inicio</label>
+                        <input type="date" id="ensayo-fecha-inicio">
+                    </div>
+                    <div class="form-group">
+                        <label>Duración (semanas)</label>
+                        <input type="number" id="ensayo-duracion" min="1" max="52">
+                    </div>
+                    <div class="form-group">
+                        <label>Progreso (%)</label>
+                        <input type="number" id="ensayo-progreso" min="0" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label>ROI Estimado (%)</label>
+                        <input type="text" id="ensayo-roi">
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Hipótesis *</label>
+                        <textarea id="ensayo-hipotesis" required></textarea>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Métrica Objetivo</label>
+                        <input type="text" id="ensayo-metrica">
+                    </div>
+                </form>
+                
+                <div style="margin-top: 2rem;">
+                    <button class="btn-admin" onclick="guardarEnsayo()">💾 Guardar Ensayo</button>
+                    <button class="btn-admin" onclick="limpiarFormularioEnsayo()">🗑️ Limpiar</button>
+                </div>
+                
+                <table class="data-table" id="tabla-ensayos">
+                    <thead>
+                        <tr>
+                            <th>Título</th>
+                            <th>Responsable</th>
+                            <th>Validador</th>
+                            <th>Progreso</th>
+                            <th>ROI</th>
+                            <th>Fecha Inicio</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            
+            <!-- Tab: Historias de Éxito -->
+            <div id="tab-historias" class="tab-content hidden">
+                <h2>🏆 Historias de Éxito</h2>
+                
+                <form id="form-historia" class="form-grid">
+                    <div class="form-group">
+                        <label>Título del Caso *</label>
+                        <input type="text" id="historia-titulo" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Problema Original</label>
+                        <input type="text" id="historia-problema-original">
+                    </div>
+                    <div class="form-group">
+                        <label>Impacto Económico</label>
+                        <input type="text" id="historia-impacto" placeholder="ej: RD$ 180,000 anuales">
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha de Resolución</label>
+                        <input type="date" id="historia-fecha">
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Solución Implementada *</label>
+                        <textarea id="historia-solucion" required></textarea>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Testimonios</label>
+                        <textarea id="historia-testimonios" placeholder="Citas de personas involucradas..."></textarea>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Participantes (separados por comas)</label>
+                        <input type="text" id="historia-participantes" placeholder="Juan Pérez, María González, Pedro Martínez">
+                    </div>
+                </form>
+                
+                <div style="margin-top: 2rem;">
+                    <button class="btn-admin" onclick="guardarHistoria()">💾 Guardar Historia</button>
+                    <button class="btn-admin" onclick="limpiarFormularioHistoria()">🗑️ Limpiar</button>
+                </div>
+                
+                <table class="data-table" id="tabla-historias">
+                    <thead>
+                        <tr>
+                            <th>Título</th>
+                            <th>Problema Original</th>
+                            <th>Impacto</th>
+                            <th>Fecha</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            
+            <!-- Tab: Red Humana -->
+            <div id="tab-usuarios" class="tab-content hidden">
+                <h2>👥 Red Humana</h2>
+                
+                <form id="form-usuario" class="form-grid">
+                    <div class="form-group">
+                        <label>Nombre Completo *</label>
+                        <input type="text" id="usuario-nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Rol/Posición *</label>
+                        <input type="text" id="usuario-rol" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Área de Trabajo</label>
+                        <select id="usuario-area">
+                            <option value="">Seleccionar área...</option>
+                            <option value="I+D">Investigación y Desarrollo</option>
+                            <option value="Producción">Producción</option>
+                            <option value="Calidad">Calidad</option>
+                            <option value="Postcosecha">Postcosecha</option>
+                            <option value="Riego">Riego</option>
+                            <option value="Nutrición">Nutrición</option>
+                            <option value="Maquinaria">Maquinaria</option>
+                            <option value="Logística">Logística</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Años de Experiencia</label>
+                        <input type="number" id="usuario-experiencia" min="0" max="50">
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Superpoderes/Especialidades (separados por comas)</label>
+                        <textarea id="usuario-superpoderes" placeholder="ej: 15 años experiencia riego, Conoce cada gotero, Detector natural estrés hídrico"></textarea>
+                    </div>
+                </form>
+                
+                <div style="margin-top: 2rem;">
+                    <button class="btn-admin" onclick="guardarUsuario()">💾 Guardar Usuario</button>
+                    <button class="btn-admin" onclick="limpiarFormularioUsuario()">🗑️ Limpiar</button>
+                </div>
+                
+                <table class="data-table" id="tabla-usuarios">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Rol</th>
+                            <th>Área</th>
+                            <th>Experiencia</th>
+                            <th>Aportes</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            
+            <!-- Tab: Configuración -->
+            <div id="tab-configuracion" class="tab-content hidden">
+                <h2>⚙️ Configuración del Sistema</h2>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nombre de la Empresa</label>
+                        <input type="text" id="config-empresa" value="Plantaciones del Norte">
+                    </div>
+                    <div class="form-group">
+                        <label>Ubicación</label>
+                        <input type="text" id="config-ubicacion" value="Santa Cruz de Mao, Valverde">
+                    </div>
+                    <div class="form-group">
+                        <label>Email de Contacto</label>
+                        <input type="email" id="config-email">
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <input type="tel" id="config-telefono">
+                    </div>
+                </div>
+                
+                <h3 style="margin-top: 2rem;">🎨 Personalización</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Color Principal</label>
+                        <input type="color" id="config-color-principal" value="#21808d">
+                    </div>
+                    <div class="form-group">
+                        <label>Logo de la Empresa</label>
+                        <div class="file-upload" onclick="document.getElementById('config-logo').click()">
+                            <p>🖼️ Subir logo</p>
+                            <input type="file" id="config-logo" style="display: none;" accept="image/*">
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 style="margin-top: 2rem;">📧 Notificaciones</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="config-notif-problemas" checked>
+                            Notificar nuevos problemas
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="config-notif-ensayos" checked>
+                            Notificar progreso de ensayos
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="config-notif-historias" checked>
+                            Notificar nuevas historias de éxito
+                        </label>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 2rem;">
+                    <button class="btn-admin" onclick="guardarConfiguracion()">💾 Guardar Configuración</button>
+                    <button class="btn-admin danger" onclick="resetearSistema()">🔄 Resetear Sistema</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para Edición -->
+    <div id="modal-edicion" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="modal-titulo">Editar Item</h3>
+            <div id="modal-form"></div>
+            <div style="margin-top: 2rem; text-align: right;">
+                <button class="btn-admin" onclick="cerrarModal()">Cancelar</button>
+                <button class="btn-admin" onclick="guardarEdicion()">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="admin.js"></script>
+</body>
+</html>
